@@ -7,7 +7,7 @@ VS 2012:    Szeberényi Imre, 2015.,
 mem_dump:   2016.
 inclue-ok:  2017., 2018. 2019.
 *********************************/
-
+#define MEMTRACE
 #ifndef MEMTRACE_H
 #define MEMTRACE_H
 
