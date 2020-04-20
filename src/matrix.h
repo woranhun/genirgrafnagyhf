@@ -8,6 +8,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <iomanip>
+#include <cstring>
 #include "memtrace.h"
 
 template<typename T>
@@ -46,7 +48,27 @@ public:
     };
 
     Matrix(std::ifstream &file) {
-        *this = readMatrixFromFile(file);
+        if (!file.is_open()) throw std::runtime_error("Can't open file!");
+        std::string line;
+        std::stringstream ss;
+        std::getline(file, line);
+        ss << line;
+        ss >> ymax >> xmax;
+        rows = new MatrixRow<T>[ymax];
+        for (size_t i = 0; i < ymax; ++i) {
+            rows[i] = MatrixRow<T>(xmax);
+        }
+        for (size_t i = 0; i < ymax; ++i) {
+            std::getline(file, line);
+            std::stringstream ss2;
+            ss2 << line;
+            for (size_t j = 0; j < xmax; ++j) {
+                T t;
+                ss2 >> t;
+                setData(i, j, t);// így jó lesz az indexelés
+
+            }
+        }
     }
 
     Matrix(const Matrix<T> &m) {
@@ -78,7 +100,7 @@ public:
         if (mx.rows == NULL) return os;
         for (size_t i = 0; i < mx.ymax; ++i) {
             for (size_t j = 0; j < mx.xmax; ++j) {
-                os << mx.rows[i][j];
+                os << std::setw(20) << mx.rows[i][j];
                 os << ' ';
             }
             os << std::endl;
@@ -95,12 +117,24 @@ public:
 
     void addColoum(size_t x);
 
-    void deleteCell(size_t y, size_t x) {
+    void setToDefaultValue(size_t y, size_t x) {
         rows[y][x] = T();
+    }
+    static void freeCell(T& t){
+        delete t;
     }
 
     void setData(size_t y, size_t x, T mire) {
-        rows[y][x] = T(mire);
+        rows[y][x] = mire;
+    }
+    template<typename FUNC>
+    FUNC executeOnEveryElement(FUNC func){
+        for (size_t i = 0; i < ymax; ++i) {
+            for (size_t j = 0; j < xmax; ++j) {
+                func(rows[i][j]);
+            }
+        }
+        return func;
     }
 
     std::ofstream &saveMatrixToFile(std::ofstream &file);
@@ -148,16 +182,17 @@ public:
     };
 
     MatrixRow(const MatrixRow<T> &mr) {
-        //megdoglik
         xmax = mr.xmax;
         *this = mr;
     }
 
     MatrixRow<T> &operator=(const MatrixRow<T> &mr) {
-        xmax = mr.xmax;
-        data = new T[xmax];
-        for (int i = 0; i < xmax; ++i) {
-            data[i] = mr[i];
+        if(this!=&mr){
+            xmax = mr.xmax;
+            data = new T[xmax];
+            for (int i = 0; i < xmax; ++i) {
+                data[i] = mr[i];
+            }
         }
         return *this;
     }

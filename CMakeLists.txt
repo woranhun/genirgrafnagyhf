@@ -26,5 +26,5 @@ else (DOXYGEN_FOUND)
     message("Doxygen need to be installed to generate the doxygen documentation")
 endif (DOXYGEN_FOUND)
 
-add_executable(genirgrafNagyHF src/memtrace.cpp src/memtrace.cpp src/main.cpp src/vertex.h src/matrix.h src/graph.h)
+add_executable(genirgrafNagyHF src/memtrace.cpp src/memtrace.cpp src/main.cpp src/edge.h src/matrix.h src/graph.h src/vertex.h)
 #target_link_libraries(genirgrafNagyHF m)
