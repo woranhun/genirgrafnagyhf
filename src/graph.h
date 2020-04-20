@@ -76,19 +76,20 @@ public:
         return os;
     };
     /**
-     * @brief Hozzáad egy csúcsot a gráfhoz.
-     * @param v a hozzáadandó gráf
+     * @brief Hozzáad egy élet a gráfhoz.
+     * @param e a hozzáadandó él
      * @return nincs
      */
-    void addEdge(Edge<T> v);
+    void addEdge(Edge<T> e);
     /**
-     * @brief Eltávolít egy csúcsot a gráfból
-     * @param v az eltávolítandó gráf
+     * @brief Eltávolít egy élet a gráfból
+     * @param e az eltávolítandó él
      * @return nincs
      */
-    void removeEdge(Edge<T> v);
+    void removeEdge(Edge<T> e);
 
     class VertexSet{
+    protected:
         Vertex<T>** data;
         size_t len;
     public:
@@ -106,14 +107,106 @@ public:
             }
             return *this;
         }
+        Vertex<T>* getData(size_t index){
+            return data[index];
+        }
+        size_t getLen(){
+            return len;
+        }
         void add(Vertex<T>* v){
             data[len++]=v;
         }
-        ~VertexSet(){
+        virtual ~VertexSet(){
             delete[] data;
         }
     };
+    class BFSSet: public VertexSet{
+        long* distance;
+        Vertex<T>** prevVertex;
+        size_t prevVertexLen;
+    public:
+        BFSSet():VertexSet(),distance(NULL),prevVertex(NULL),prevVertexLen(0){};
+        BFSSet(size_t len):VertexSet(len),prevVertex(new Vertex<T>*[len]),prevVertexLen(0){
+            distance = new long[len];
+            for (size_t i = 0; i < len; ++i) {
+                distance[i]= -1;
+            }
+        };
+        BFSSet(const BFSSet& bs){
+            *this= bs;
+        }
+        BFSSet& operator=(const BFSSet& bs){
+            if(this!=&bs){
+                this->len=bs.len;
+                for (size_t i = 0; i <bs.len; ++i) {
+                    this->distance[i]=bs.distance[i];
+                    this->prevVertex[i]=bs.prevVertex[i];
+                    this->data[i]=bs.data[i];
+                    this->prevVertexLen=bs.prevVertexLen;
+                }
+            }
+            return *this;
+        }
 
+        void setDistance(size_t kinek,long mire){
+            distance[kinek]=mire;
+        }
+        long getDistance(size_t kinek){
+            return distance[kinek];
+        }
+        void addprevVertex(Vertex<T>* v){
+            prevVertex[prevVertexLen++]=v;
+        }
+        friend std::ostream& operator<<(std::ostream& os, const BFSSet& bfss){
+            for (size_t i = 0; i < bfss.len; ++i) {
+                os<< bfss.data[i]->getID()<<" ";
+            }
+            os<<std::endl;
+            return os;
+        }
+        ~BFSSet(){
+            delete[] distance;
+            delete[] prevVertex;
+        }
+    };
+
+    Vertex<T>* getVertexFromID(size_t id){
+        for (size_t i = 0; i < numofv; ++i) {
+            if(verteces[i]->getID()==id) return verteces[i];
+        }
+        return NULL;
+    }
+    BFSSet* BFS(size_t honnan, size_t hova){
+        // OPTIMALIZALNI KELL A KILEPEST
+        BFSSet* bfs = new BFSSet(getNumberOfVertices());
+        size_t j =0;
+        size_t k =0;
+        bfs->setDistance(honnan, 0);
+        bfs->add(getVertexFromID(honnan));
+        while(true){
+            VertexSet* neighboursOfk =listNeighboursOfVertex(bfs->getData(k)->getID());
+            for (size_t v = 0; v < neighboursOfk->getLen(); ++v) {
+                int tmp=0;
+                if(bfs->getDistance(neighboursOfk->getData(v)->getID())==-1){
+                    tmp++;
+                    j++;
+                    bfs->add(neighboursOfk->getData(v));
+                    bfs->setDistance(neighboursOfk->getData(v)->getID(),bfs->getDistance(bfs->getData(k)->getID())+1);
+                    bfs->addprevVertex(bfs->getData(k));
+                }
+                //if(tmp==0&&v==neighboursOfk->getLen()-1){
+                if(v==neighboursOfk->getLen()-1){
+                    if(j==k){
+                        delete neighboursOfk;
+                        return bfs;
+                    }else k++;
+                }
+            }
+            delete neighboursOfk;
+        }
+
+        return bfs;
+    }
     /**
      * @brief Felsorolja a csúcs szomszédjait.
      * @param os ostream
