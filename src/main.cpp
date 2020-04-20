@@ -14,8 +14,7 @@ int main() {
     std::cout << "Hello, World!" << std::endl;
 
     std::ifstream gf("g5f.txt");
-    Graph<char> g;
-    g.readAdjMatrixFromFile(gf);
+    Graph<char> g(gf);
     std::cout<<g;
     Graph<char>::BFSSet* ret = g.BFS(4,1);
     std::cout<<*ret;

@@ -32,6 +32,9 @@ class Graph{
     Vertex<T>** verteces;
 public:
     Graph():numofv(0),numofe(0),adjMatrix(Matrix<Edge<T> >()),verteces(NULL){};
+    Graph(std::ifstream& file){
+        readAdjMatrixFromFile(file);
+    }
     /**
      * @brief Visszadja a csúcsok számát.
      * @return csúcsok száma
@@ -154,7 +157,7 @@ public:
         long getDistance(size_t kinek){
             return distance[kinek];
         }
-        void addprevVertex(Vertex<T>* v){
+        void addPrevVertex(Vertex<T>* v){
             prevVertex[prevVertexLen++]=v;
         }
         friend std::ostream& operator<<(std::ostream& os, const BFSSet& bfss){
@@ -192,7 +195,7 @@ public:
                     j++;
                     bfs->add(neighboursOfk->getData(v));
                     bfs->setDistance(neighboursOfk->getData(v)->getID(),bfs->getDistance(bfs->getData(k)->getID())+1);
-                    bfs->addprevVertex(bfs->getData(k));
+                    bfs->addPrevVertex(bfs->getData(k));
                 }
                 //if(tmp==0&&v==neighboursOfk->getLen()-1){
                 if(v==neighboursOfk->getLen()-1){
