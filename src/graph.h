@@ -29,8 +29,9 @@ class Graph{
     size_t numofv;
     size_t numofe;
     Matrix< Edge<T> > adjMatrix;
+    Vertex<T>** verteces;
 public:
-    Graph():numofv(0),numofe(0),adjMatrix(Matrix<Edge<T> >()){};
+    Graph():numofv(0),numofe(0),adjMatrix(Matrix<Edge<T> >()),verteces(NULL){};
     /**
      * @brief Visszadja a csúcsok számát.
      * @return csúcsok száma
@@ -67,11 +68,7 @@ public:
         for (size_t i = 0; i < g.adjMatrix.getxmax(); ++i) {
             os<<i<<" | ";
             for (size_t j = 0; j < g.adjMatrix.getymax(); ++j) {
-                if(g.adjMatrix[i][j].isConnected()){
-                    if(g.adjMatrix[i][j].getName()=="")os<<"1"<<" ";
-                    else os<< g.adjMatrix[i][j].getName() << ' ';
-                }
-                else os<<"0"<<' ';
+                os<< g.adjMatrix[i][j].isConnected()<<" ";
             }
 
             os<<std::endl;
@@ -90,53 +87,69 @@ public:
      * @return nincs
      */
     void removeEdge(Edge<T> v);
+
+    class VertexSet{
+        Vertex<T>** data;
+        size_t len;
+    public:
+        VertexSet():len(0),data(NULL){};
+        VertexSet(size_t len):len(0),data(new Vertex<T>*[len]){};
+        VertexSet(const VertexSet& vs){
+            *this = vs;
+        }
+        VertexSet& operator=(const VertexSet& vs){
+            if(this!=&vs){
+                for (size_t i = 0; i < vs.len; ++i) {
+                    data[i]=vs.data[i];
+                    len=vs.len;
+                }
+            }
+            return *this;
+        }
+        void add(Vertex<T>* v){
+            data[len++]=v;
+        }
+        ~VertexSet(){
+            delete[] data;
+        }
+    };
+
     /**
      * @brief Felsorolja a csúcs szomszédjait.
      * @param os ostream
      * @param v a kiválasztott csúcs
      * @return ostream
      */
-    size_t* listNeighboursOfVertex(size_t v){
-        size_t n=0;
+    VertexSet* listNeighboursOfVertex(size_t v){
+        VertexSet* vs = new VertexSet(numofv);
         for (size_t i = 0; i < numofv; ++i) {
-            if(adjMatrix[v][i].isConnected())n++;
+            if(adjMatrix[v][i].isConnected()) vs->add(adjMatrix[v][i].getDestination());
         }
-        size_t* ret = new size_t[n];
-        size_t c=0;
-        for (size_t j = 0; j < numofv; ++j) {
-            if(adjMatrix[v][j].isConnected())ret[c++]=adjMatrix[v][j].getId();
-        }
-        return ret;
-    };
+        return vs;
+    }
 
 
     void readAdjMatrixFromFile(std::ifstream& file){
         Matrix<bool>m(file);
         adjMatrix = Matrix<Edge<T> >(m.getymax(),m.getxmax());
+        verteces = new Vertex<T>*[m.getymax()];
         size_t idval=0;
         for (size_t i = 0; i < m.getymax(); ++i) {
+            verteces[i]= new Vertex<T>(i);
             numofv++;
+        }
+        for (size_t i = 0; i < m.getymax(); ++i) {
             for (size_t j = 0; j < m.getxmax(); ++j) {
-                adjMatrix.setData(i, j, Edge<T>(idval++, m[i][j]));
+                adjMatrix.setData(i, j, Edge<T>(idval++, verteces[i],verteces[j],m[i][j]));
                 if(m[i][j])numofe++;
             }
         }
-        numofe=numofe/2;
     }
-
-    Edge<T>& operator[](size_t id){
+    ~Graph(){
         for (size_t i = 0; i < numofv; ++i) {
-            for (size_t j = 0; j < numofv; ++j) {
-                if(adjMatrix[i][j].getId()==id)return adjMatrix[i][j];
-            }
+           delete verteces[i];
         }
-    }
-    const Edge<T>& operator[](size_t id)const{
-        for (size_t i = 0; i < numofv; ++i) {
-            for (size_t j = 0; j < numofv; ++j) {
-                if(adjMatrix[i][j].getId()==id)return adjMatrix[i][j];
-            }
-        }
+        delete[] verteces;
     }
 };
 

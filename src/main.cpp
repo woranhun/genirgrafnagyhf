@@ -16,11 +16,14 @@ int main() {
     std::ifstream g1f("g1f.txt");
     Graph<char> g1;
     g1.readAdjMatrixFromFile(g1f);
-    size_t* ret = g1.listNeighboursOfVertex(1);
-    std::cout<<g1;
 
-    std::cout<<g1[ret[0]].getId();
+    std::ifstream g2f("g2f.txt");
+    Graph<char> g2;
+    g2.readAdjMatrixFromFile(g2f);
+    Graph<char>::VertexSet* ret = g2.listNeighboursOfVertex(1);
 
-    delete[] ret;
+    std::cout<<g2;
+
+    delete ret;
     return 0;
 }

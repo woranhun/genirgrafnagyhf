@@ -6,6 +6,8 @@
 #ifndef GENIRGRAFNAGYHF_EDGE_H
 #define GENIRGRAFNAGYHF_EDGE_H
 #include "memtrace.h"
+
+#include "vertex.h"
 /**
  * @class Csúcs osztály.
  * @brief Csúcs osztály.
@@ -17,42 +19,31 @@ class Edge{
      * @param data a csúcs értékének tárolója
      * @param name a csúcs neve
      */
-    T data;
-    std::string name;
     bool connected;
     size_t id;
+    Vertex<T>* src;
+    Vertex<T>* dst;
+    double weight;
 public:
-    Edge(bool connected=false):data(T()),connected(connected),name(std::string()){};
-    Edge(size_t id, bool connected=false):data(T()),id(id),connected(connected),name(std::string()){};
-
-    Edge(const Edge<T>& v){
-        *this=v;
+    Edge():id(0),src(NULL),dst(NULL),weight(1){};
+    Edge(size_t id,Vertex<T>* src,Vertex<T>* dst, bool connected=false,double weight=1):id(id),src(src),dst(dst),weight(weight),connected(connected){};
+    Edge(const Edge<T>& e){
+        *this=e;
     }
-    Edge<T>& operator=(const Edge& v){
-        if(this!=&v){
-            this->data=v.data;
-            this->name=v.name;
-            this->connected=v.connected;
-            this->id=v.id;
+    Edge<T>& operator=(const Edge& e){
+        if(this!=&e){
+            this->connected=e.connected;
+            this->id=e.id;
+            this->src=e.src;
+            this->dst=e.dst;
+            this->weight=e.weight;
         }
         return *this;
     }
-    /**
-     * @brief Visszadja a csúcs értékét.
-     * @return a visszadott adat
-     */
-    T getData(){return data;}
-    /**
-     * @brief Beállítja a csúcs értékét a megadottra.
-     * @param mit az adat, amire állítjuk a csúcs értékét
-     */
-    void setData(T mit){data= T(mit);}
-    size_t getId(){return id;}
+    size_t getID(){return id;}
     bool isConnected(){return connected;}
-    std::string getName()const {return name;}
-    void setName(const std::string& s){
-        name=s;
-    }
+    Vertex<T>* getSource(){return this->src;}
+    Vertex<T>* getDestination(){return this->dst;}
     template<typename F>
     friend std::ostream& operator<<(std::ostream& os, const Edge<F>& v){
         os<<v.name<<"A;";
