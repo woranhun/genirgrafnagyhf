@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iomanip>
 #include <cstring>
+#include <sstream>
 #include "memtrace.h"
 
 template<typename T>
@@ -190,7 +191,7 @@ public:
         if(this!=&mr){
             xmax = mr.xmax;
             data = new T[xmax];
-            for (int i = 0; i < xmax; ++i) {
+            for (size_t i = 0; i < xmax; ++i) {
                 data[i] = mr[i];
             }
         }

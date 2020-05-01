@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(genirgrafNagyHF)
 
 set(CMAKE_CXX_STANDARD 98)
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 # first we can indicate the documentation build as an option and set it to ON by default
 option(BUILD_DOC "Build documentation" ON)
 

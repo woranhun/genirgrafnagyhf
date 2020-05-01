@@ -19,14 +19,14 @@ class Edge{
      * @param data a csúcs értékének tárolója
      * @param name a csúcs neve
      */
-    bool connected;
     size_t id;
     Vertex<T>* src;
     Vertex<T>* dst;
+    bool connected;
     double weight;
 public:
-    Edge():id(0),src(NULL),dst(NULL),weight(1){};
-    Edge(size_t id,Vertex<T>* src,Vertex<T>* dst, bool connected=false,double weight=1):id(id),src(src),dst(dst),weight(weight),connected(connected){};
+    Edge():id(0),src(NULL),dst(NULL),connected(false),weight(1){};
+    Edge(size_t id,Vertex<T>* src,Vertex<T>* dst, bool connected=false,double weight=1):id(id),src(src),dst(dst),connected(connected),weight(weight){};
     Edge(const Edge<T>& e){
         *this=e;
     }

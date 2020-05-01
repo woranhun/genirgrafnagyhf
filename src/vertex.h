@@ -4,6 +4,7 @@
 
 #ifndef GENIRGRAFNAGYHF_VERTEX_H
 #define GENIRGRAFNAGYHF_VERTEX_H
+#include "memtrace.h"
 template<typename V>
 class Vertex{
     size_t id;

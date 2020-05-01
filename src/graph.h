@@ -22,17 +22,27 @@
 template<typename T>
 class Graph{
     /**
-     * @param v a csúcsok száma
-     * @param e az élek száma
+     * @param numofv a csúcsok száma
+     * @param numofe az élek száma
      * @param adjMatrix a gráfhoz tartozó szomszédsági mátrix
+     * @param verteces a gráfhoz tartozó csúcsok
      */
     size_t numofv;
     size_t numofe;
     Matrix< Edge<T> > adjMatrix;
     Vertex<T>** verteces;
 public:
+    /**
+     * @brief Grapf default konstruktora
+     */
     Graph():numofv(0),numofe(0),adjMatrix(Matrix<Edge<T> >()),verteces(NULL){};
+    /**
+     * @brief a Graph konstruktora fájlból
+     * @param file a szomszédsági mátrix fájlja
+     */
     Graph(std::ifstream& file){
+        this->numofv=0;
+        this->numofe=0;
         readAdjMatrixFromFile(file);
     }
     /**
@@ -49,7 +59,12 @@ public:
      * @brief Visszadja, hogy összefüggő-e a gráf, ehhez a BFS algoritmust fogja használni.
      * @return összefüggő -e a gráf
      */
-    bool isConnectedGraph();
+    bool isConnectedGraph(){
+        Graph<char>::BFSSet* ret = this->BFS();
+        bool isConn= ret->getLen()==this->getNumberOfVertices();
+        delete ret;
+        return isConn;
+    }
     /**
      * @brief Kirajzolja a gráf szomszédsági mátrixát.
      * @param os ostream
@@ -91,16 +106,38 @@ public:
      */
     void removeEdge(Edge<T> e);
 
+    /**
+     * @class VertexSet osztály
+     * @brief Csúcsok halmazának tárolására alkalmas osztály
+     * @param data a csúcsok tömbje, maximális mérete megegyezik a gráf csúcsainak számával
+     * @param len az éppen tárolt mennyiség
+     */
     class VertexSet{
     protected:
-        Vertex<T>** data;
         size_t len;
+        Vertex<T>** data;
     public:
+        /**
+         *@brief A csúcshalmaz default konstruktora
+         */
         VertexSet():len(0),data(NULL){};
+        /**
+         * @brief A csúcshalmaz méret alapján történő konstruktora. Itt a méret a halmaz méretét jelenti
+         * @param len A halmaz mérete
+         */
         VertexSet(size_t len):len(0),data(new Vertex<T>*[len]){};
+        /**
+         * @brief A halmaz copy ctorja
+         * @param vs A halmaz, amit másolni szeretnénk.
+         */
         VertexSet(const VertexSet& vs){
             *this = vs;
         }
+        /**
+         * @brief A halmaz = operatora
+         * @param vs az egyenlőségjel jobb oldalán lévő halmazra mutató referencia
+         * @return Az új halmaz
+         */
         VertexSet& operator=(const VertexSet& vs){
             if(this!=&vs){
                 for (size_t i = 0; i < vs.len; ++i) {
@@ -110,19 +147,43 @@ public:
             }
             return *this;
         }
-        Vertex<T>* getData(size_t index){
+        /**
+         * @brief visszaadja a kért csúcsot
+         * @bug Át let nevezve getData-ról, hogy átláthatóbb legyen a kód. ÍRD ÁT UML-BEN !IMPORTANT!
+         * @param index a csúcs id-je
+         * @return a kért csúcs
+         */
+        Vertex<T>* getVertex(size_t index){
             return data[index];
         }
+        /**
+         * @brief visszaadja a set aktuális méretét
+         * @return a méret
+         */
         size_t getLen(){
             return len;
         }
+        /**
+         * @brief Hozzáad a halmazhoz egy új csúcsot
+         * @param v a csúcsra mutató pointer
+         */
         void add(Vertex<T>* v){
             data[len++]=v;
         }
+        /**
+         * @brief A halmaz osztály destruktora. A csúcsok felszabadítását a Gráf végzi.
+         */
         virtual ~VertexSet(){
             delete[] data;
         }
     };
+    /**
+     * @class BFSSet osztály
+     * @brief BFS algoritmushoz készült tároló. A VerexSet-ből származik.
+     * @param distance Távolság a kezdőponttól. Alapértelmezett érték -1;
+     * @param prevVertex Egy lista, ami megmutatja, hogy honnan jutottam az adott csúcsba
+     * @param prevVertexLen Ennek a listának a mérete
+     */
     class BFSSet: public VertexSet{
         long* distance;
         Vertex<T>** prevVertex;
@@ -172,32 +233,43 @@ public:
             delete[] prevVertex;
         }
     };
-
+    /**
+     * @brief Visszaad egy csúcsra mutató pointert, amit ID alapján határoz meg
+     * @param id Az ID amit a felhasználótól kapunk
+     * @return A csúcsra mutató pointer
+     */
     Vertex<T>* getVertexFromID(size_t id){
         for (size_t i = 0; i < numofv; ++i) {
             if(verteces[i]->getID()==id) return verteces[i];
         }
         return NULL;
     }
-    BFSSet* BFS(size_t honnan, size_t hova){
-        // OPTIMALIZALNI KELL A KILEPEST
+    /**
+     * @bug optimalizálni kell a kilépést! !IMPORTANT!
+     * @bug default pramétereket át kell írni az UML-en! !IMPORTANT!
+     * @brief BFS alkogritmus
+     * @param honnan csúcs id, ahonnan az algo indul
+     * @param hova csúcs id, ahová a legrövidebb utat adja vissza.
+     * @bug hova nincs megírva
+     * @return visszad egy BFSSet-re mutató pointert. A felszabadítás az user dolga.
+     */
+    BFSSet* BFS(size_t honnan=0, size_t hova=0){
         BFSSet* bfs = new BFSSet(getNumberOfVertices());
         size_t j =0;
         size_t k =0;
         bfs->setDistance(honnan, 0);
         bfs->add(getVertexFromID(honnan));
         while(true){
-            VertexSet* neighboursOfk =listNeighboursOfVertex(bfs->getData(k)->getID());
+            VertexSet* neighboursOfk =listNeighboursOfVertex(bfs->getVertex(k)->getID());
             for (size_t v = 0; v < neighboursOfk->getLen(); ++v) {
                 int tmp=0;
-                if(bfs->getDistance(neighboursOfk->getData(v)->getID())==-1){
+                if(bfs->getDistance(neighboursOfk->getVertex(v)->getID())==-1){
                     tmp++;
                     j++;
-                    bfs->add(neighboursOfk->getData(v));
-                    bfs->setDistance(neighboursOfk->getData(v)->getID(),bfs->getDistance(bfs->getData(k)->getID())+1);
-                    bfs->addPrevVertex(bfs->getData(k));
+                    bfs->add(neighboursOfk->getVertex(v));
+                    bfs->setDistance(neighboursOfk->getVertex(v)->getID(),bfs->getDistance(bfs->getVertex(k)->getID())+1);
+                    bfs->addPrevVertex(bfs->getVertex(k));
                 }
-                //if(tmp==0&&v==neighboursOfk->getLen()-1){
                 if(v==neighboursOfk->getLen()-1){
                     if(j==k){
                         delete neighboursOfk;
