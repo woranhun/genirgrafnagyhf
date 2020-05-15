@@ -3,8 +3,8 @@
  * @brief matrix header
  */
 
-#ifndef GENIRGRAFNAGYHF_MATRIX_H
-#define GENIRGRAFNAGYHF_MATRIX_H
+#ifndef GENIRGRAFNAGYHF_MATRIX_HPP
+#define GENIRGRAFNAGYHF_MATRIX_HPP
 
 #include <iostream>
 #include <fstream>
@@ -21,7 +21,7 @@ class MatrixRow;
 
 
 /**
- * @class mátrix osztály
+ * @class Matrix
  * @brief mátrix osztály
  * @tparam T a mátrix adatainak típusa
  */
@@ -110,14 +110,6 @@ public:
         return os;
     }
 
-    void deleteRow(size_t y);
-
-    void deleteColumn(size_t x);
-
-    void addRow(size_t y);
-
-    void addColoum(size_t x);
-
     void setToDefaultValue(size_t y, size_t x) {
         rows[y][x] = T();
     }
@@ -137,8 +129,23 @@ public:
         }
         return func;
     }
-
-    std::ofstream &saveMatrixToFile(std::ofstream &file);
+    /**
+     * @bug UML-en átírni
+     * @param filename
+     */
+    void saveMatrixToFile(const std::string& filename){
+        std::ofstream file;
+        file.open(filename.c_str());
+        if (!file.is_open()) throw std::runtime_error("Can't open file!");
+        file<< this->ymax <<" "<< this->xmax<<std::endl;
+        for (size_t i = 0; i < ymax; ++i) {
+            for (size_t j = 0; j < xmax; ++j) {
+                file<< this->rows[i][j].isConnected()<<" ";
+            }
+            file<<std::endl;
+        }
+        file.close();
+    }
 
     std::ifstream &readMatrixFromFile(std::ifstream &file) {
         if (!file.is_open()) throw std::runtime_error("Can't open file!");
@@ -146,7 +153,7 @@ public:
         std::stringstream ss;
         std::getline(file, line);
         ss << line;
-        int y, x;
+        size_t y, x;
         ss >> y >> x;
         *this = Matrix<T>(y, x);
         for (size_t i = 0; i < y; ++i) {
@@ -213,4 +220,4 @@ public:
 };
 
 
-#endif //GENIRGRAFNAGYHF_MATRIX_H
+#endif //GENIRGRAFNAGYHF_MATRIX_HPP

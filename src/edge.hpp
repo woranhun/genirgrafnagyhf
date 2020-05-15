@@ -1,23 +1,26 @@
 /**
  * @file
- * @brief vertex header
+ * @brief edge header
  */
 
-#ifndef GENIRGRAFNAGYHF_EDGE_H
-#define GENIRGRAFNAGYHF_EDGE_H
+#ifndef GENIRGRAFNAGYHF_EDGE_HPP
+#define GENIRGRAFNAGYHF_EDGE_HPP
 #include "memtrace.h"
 
-#include "vertex.h"
+#include "vertex.hpp"
 /**
- * @class Csúcs osztály.
- * @brief Csúcs osztály.
- * @tparam T a csúcsok típusa
+ * @class Edge
+ * @brief Él osztály.
+ * @tparam T az élek típusa
  */
 template<typename T>
 class Edge{
     /**
-     * @param data a csúcs értékének tárolója
-     * @param name a csúcs neve
+     * @param id az él azonosítója
+     * @param src A forrás csúcs
+     * @param dst A cél csúcs
+     * @param connected Az él be van-e húzva
+     * @param weight Az él súlya
      */
     size_t id;
     Vertex<T>* src;
@@ -45,10 +48,13 @@ public:
     Vertex<T>* getSource(){return this->src;}
     Vertex<T>* getDestination(){return this->dst;}
     template<typename F>
-    friend std::ostream& operator<<(std::ostream& os, const Edge<F>& v){
-        os<<v.name<<"A;";
-        return os;
-    }
+    friend std::ostream& operator<<(std::ostream& os, const Edge<F>& v);
 
 };
-#endif //GENIRGRAFNAGYHF_EDGE_H
+template<typename F>
+std::ostream& operator<<(std::ostream& os, const Edge<F>& v){
+    os<<v.name;
+    return os;
+}
+
+#endif //GENIRGRAFNAGYHF_EDGE_HPP

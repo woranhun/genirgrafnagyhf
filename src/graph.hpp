@@ -3,25 +3,26 @@
  * @brief graph.h header
  */
 
-#ifndef GENIRGRAFNAGYHF_GRAPH_H
-#define GENIRGRAFNAGYHF_GRAPH_H
+#ifndef GENIRGRAFNAGYHF_GRAPH_HPP
+#define GENIRGRAFNAGYHF_GRAPH_HPP
 #include <iostream>
 
 #include "memtrace.h"
 
-#include "matrix.h"
-#include "edge.h"
-#include "vertex.h"
+#include "matrix.hpp"
+#include "edge.hpp"
+#include "vertex.hpp"
 
 
 /**
- * @class Graph graph.h osztály
+ * @class Graph
  * @brief Graph osztály
  * @tparam T a csúcsok típusa
  */
 template<typename T>
 class Graph{
     /**
+     * @bug feltoltve nincs UML-en
      * @param numofv a csúcsok száma
      * @param numofe az élek száma
      * @param adjMatrix a gráfhoz tartozó szomszédsági mátrix
@@ -31,11 +32,12 @@ class Graph{
     size_t numofe;
     Matrix< Edge<T> > adjMatrix;
     Vertex<T>** verteces;
+    bool feltoltve;
 public:
     /**
      * @brief Grapf default konstruktora
      */
-    Graph():numofv(0),numofe(0),adjMatrix(Matrix<Edge<T> >()),verteces(NULL){};
+    Graph():numofv(0),numofe(0),adjMatrix(Matrix<Edge<T> >()),verteces(NULL),feltoltve(false){};
     /**
      * @brief a Graph konstruktora fájlból
      * @param file a szomszédsági mátrix fájlja
@@ -60,7 +62,7 @@ public:
      * @return összefüggő -e a gráf
      */
     bool isConnectedGraph(){
-        Graph<char>::BFSSet* ret = this->BFS();
+        Graph<T>::BFSSet* ret = this->BFS();
         bool isConn= ret->getLen()==this->getNumberOfVertices();
         delete ret;
         return isConn;
@@ -72,48 +74,39 @@ public:
      * @return ostream
      */
     template<typename F>
-    friend std::ostream& operator<<(std::ostream& os,Graph<F>& g){
-        os<<"vertices: "<<g.getNumberOfVertices()<<" ; edges: "<<g.getNumberOfEdges()<<std::endl;
-        os<<"    ";
-        for (size_t k = 0; k < g.adjMatrix.getxmax(); ++k) {
-            os<<k<<" ";
-        }
-        os<<std::endl<<"  ";
-        for (size_t k = 0; k < g.adjMatrix.getxmax(); ++k) {
-            os<<"---";
-        }
-        os<<std::endl;
-        for (size_t i = 0; i < g.adjMatrix.getxmax(); ++i) {
-            os<<i<<" | ";
-            for (size_t j = 0; j < g.adjMatrix.getymax(); ++j) {
-                os<< g.adjMatrix[i][j].isConnected()<<" ";
-            }
-
-            os<<std::endl;
-        }
-        return os;
-    };
+    friend std::ostream& operator<<(std::ostream& os,Graph<F>& g);
     /**
      * @brief Hozzáad egy élet a gráfhoz.
      * @param e a hozzáadandó él
      * @return nincs
      */
-    void addEdge(Edge<T> e);
+    void setEdge(size_t y, size_t x,bool con, Vertex<T>* src,Vertex<T>* dst){
+        if(!this->adjMatrix[y][x]&&con)numofe++;
+        else if(this->adjMatrix[y][x]&&!con) numofe--;
+        adjMatrix[y][x]->connected = con;
+        adjMatrix[y][x]->src=src;
+        adjMatrix[y][x]->dst=dst;
+    }
     /**
+     * @bug Remove from UML
      * @brief Eltávolít egy élet a gráfból
      * @param e az eltávolítandó él
      * @return nincs
      */
-    void removeEdge(Edge<T> e);
+    //void removeEdge(Edge<T> e);
 
     /**
-     * @class VertexSet osztály
+     * @class VertexSet
      * @brief Csúcsok halmazának tárolására alkalmas osztály
      * @param data a csúcsok tömbje, maximális mérete megegyezik a gráf csúcsainak számával
      * @param len az éppen tárolt mennyiség
      */
     class VertexSet{
     protected:
+        /**
+         * @param len Vertex set aktuális mérete
+         * @param data az adatokat tároló tömb
+         */
         size_t len;
         Vertex<T>** data;
     public:
@@ -178,27 +171,48 @@ public:
         }
     };
     /**
-     * @class BFSSet osztály
+     * @class BFSSet
      * @brief BFS algoritmushoz készült tároló. A VerexSet-ből származik.
      * @param distance Távolság a kezdőponttól. Alapértelmezett érték -1;
      * @param prevVertex Egy lista, ami megmutatja, hogy honnan jutottam az adott csúcsba
      * @param prevVertexLen Ennek a listának a mérete
      */
     class BFSSet: public VertexSet{
+        /**
+         * @param distance A csúcs távolsága a kezdőcsúcstól
+         * @param prevVertex Lista, amely minden csúcshoz hozzárendelő az őt megelőző csúcs azonosítóját
+         * @param prevVertexLen Tárolja a lista aktuális méretét
+         */
         long* distance;
         Vertex<T>** prevVertex;
         size_t prevVertexLen;
     public:
+        /**
+         * @brief BFSSet default konstruktora
+         */
         BFSSet():VertexSet(),distance(NULL),prevVertex(NULL),prevVertexLen(0){};
+        /**
+         * @brief Max méretet beállító konstruktora
+         * @param len maximális méret
+         */
         BFSSet(size_t len):VertexSet(len),prevVertex(new Vertex<T>*[len]),prevVertexLen(0){
             distance = new long[len];
             for (size_t i = 0; i < len; ++i) {
                 distance[i]= -1;
             }
         };
+        /**
+         * @brief BFSSet másoló konstruktora
+         * @param bs a másik BFSSet
+         */
         BFSSet(const BFSSet& bs){
             *this= bs;
         }
+        /**
+         * @brief BFSSet értékadó operátora
+         * @param bs a másik BFSSet
+         * @return visszaadja a keletkezett BFSSetet
+         */
         BFSSet& operator=(const BFSSet& bs){
             if(this!=&bs){
                 this->len=bs.len;
@@ -211,16 +225,35 @@ public:
             }
             return *this;
         }
-
+        /**
+         * @brief Beállítja a csúcs távolságát
+         * @param kinek a megfelelő csúcs
+         * @param mire a távolság érték
+         */
         void setDistance(size_t kinek,long mire){
             distance[kinek]=mire;
         }
+        /**
+         * @brief Visszaadja a csúcs távolságát a kezdőponttól mérve
+         * @param kinek a megfelelő csúcs
+         * @return a távolság értéke
+         */
         long getDistance(size_t kinek){
             return distance[kinek];
         }
+        /**
+         * @brief A PrevVertex listának a végéhez hozzáad egy elemet
+         * @param v A hozzáadandó csúcsra mutató pointer
+         */
         void addPrevVertex(Vertex<T>* v){
             prevVertex[prevVertexLen++]=v;
         }
+        /**
+         * @brief A BFSSet << operátora
+         * @param os A kapott ostream
+         * @param bfss A kapott BFSSet
+         * @return A keletkezett ostream
+         */
         friend std::ostream& operator<<(std::ostream& os, const BFSSet& bfss){
             for (size_t i = 0; i < bfss.len; ++i) {
                 os<< bfss.data[i]->getID()<<" ";
@@ -228,6 +261,9 @@ public:
             os<<std::endl;
             return os;
         }
+        /**
+         * @brief A BFSSet destruktora
+         */
         ~BFSSet(){
             delete[] distance;
             delete[] prevVertex;
@@ -245,26 +281,30 @@ public:
         return NULL;
     }
     /**
-     * @bug optimalizálni kell a kilépést! !IMPORTANT!
+     * @bug UML-re felrakni
+     * @brief Visszadja a kapott ID alapján a megfelelő csúcshoz tartozó adatot
+     * @param id A kapott ID
+     * @return A csúcs adata
+     */
+    T getDataFromID(size_t id){
+        return verteces[id]->getData();
+    }
+    /**
      * @bug default pramétereket át kell írni az UML-en! !IMPORTANT!
      * @brief BFS alkogritmus
-     * @param honnan csúcs id, ahonnan az algo indul
-     * @param hova csúcs id, ahová a legrövidebb utat adja vissza.
-     * @bug hova nincs megírva
-     * @return visszad egy BFSSet-re mutató pointert. A felszabadítás az user dolga.
+     * @param honnan csúcs id, ahonnan az algoritmus indul
+     * @return visszad egy BFSSet-re mutató pointert. A felszabadítás a felhasználó dolga.
      */
-    BFSSet* BFS(size_t honnan=0, size_t hova=0){
+    BFSSet* BFS(size_t honnan=0){
         BFSSet* bfs = new BFSSet(getNumberOfVertices());
-        size_t j =0;
-        size_t k =0;
+        size_t j =0; // eddig bejárt csúcsok száma
+        size_t k =0; // jelenlegi katív csúcs sorszáma
         bfs->setDistance(honnan, 0);
         bfs->add(getVertexFromID(honnan));
         while(true){
             VertexSet* neighboursOfk =listNeighboursOfVertex(bfs->getVertex(k)->getID());
             for (size_t v = 0; v < neighboursOfk->getLen(); ++v) {
-                int tmp=0;
                 if(bfs->getDistance(neighboursOfk->getVertex(v)->getID())==-1){
-                    tmp++;
                     j++;
                     bfs->add(neighboursOfk->getVertex(v));
                     bfs->setDistance(neighboursOfk->getVertex(v)->getID(),bfs->getDistance(bfs->getVertex(k)->getID())+1);
@@ -279,14 +319,11 @@ public:
             }
             delete neighboursOfk;
         }
-
-        return bfs;
     }
     /**
-     * @brief Felsorolja a csúcs szomszédjait.
-     * @param os ostream
-     * @param v a kiválasztott csúcs
-     * @return ostream
+     * @brief Megkeresi a kapott csúcs szomszédait
+     * @param v  a kapott csúcs
+     * @return VertexSet*-ot ad vissza. A felszabadítás a felhasználó dolga
      */
     VertexSet* listNeighboursOfVertex(size_t v){
         VertexSet* vs = new VertexSet(numofv);
@@ -295,8 +332,10 @@ public:
         }
         return vs;
     }
-
-
+    /**
+     * @brief Beolvas egy szomszédsági mátrixot és beállítja azt a gráfnak
+     * @param file A file-ra mutató ifstream
+     */
     void readAdjMatrixFromFile(std::ifstream& file){
         Matrix<bool>m(file);
         adjMatrix = Matrix<Edge<T> >(m.getymax(),m.getxmax());
@@ -313,6 +352,52 @@ public:
             }
         }
     }
+    /**
+     * @brief Elmenti a szomszédsági mátrixot a megadott nevő fájlba.
+     * @param file A kapott fájlnév
+     */
+    void saveAdjMatrixToFile(const std::string& file){
+        adjMatrix.saveMatrixToFile(file);
+    }
+    /**
+     * @brief Beolvassa a csúcs adatait fájlból
+     * @param file A beolvasandó file
+     */
+    void readDataFromFile(std::ifstream& file){
+        if (!file.is_open()) throw std::runtime_error("Can't open file!");
+        for (size_t i = 0; i < numofv; ++i) {
+            std::string line;
+            std::stringstream ss;
+            std::getline(file, line);
+            ss << line;
+            T tempdata;
+            ss>> tempdata;
+            verteces[i]->setData(tempdata);
+        }
+        feltoltve=true;
+    }
+    /**
+     * @brief Beolvassa a csúcs adatait fájlból, majd meghívja miden soron a kapott függvényt.
+     * @tparam FUNC A kapott függvény típusa
+     * @param file A kapott file
+     * @param f A kapott fügvény, amely létrehozza a T objektumot a kapott sor alapján.
+     */
+    template<class FUNC>
+    void readDataFromFile(std::ifstream& file,FUNC f){
+        if (!file.is_open()) throw std::runtime_error("Can't open file!");
+        for (size_t i = 0; i < numofv; ++i) {
+            std::string line;
+            std::getline(file, line);
+            T* tempptr = f(line);
+            T tempdata = *tempptr;
+            verteces[i]->setData(tempdata);
+            delete tempptr;
+        }
+        feltoltve=true;
+    }
+    /**
+     * @brief A gráf destruktora
+     */
     ~Graph(){
         for (size_t i = 0; i < numofv; ++i) {
            delete verteces[i];
@@ -320,5 +405,41 @@ public:
         delete[] verteces;
     }
 };
+/**
+ * @brief A gráf kiírását végző függvény
+ * @tparam F A gráf ilyen adatokat tárol
+ * @param os ostream referencia
+ * @param g A kapott gráf
+ * @return A keletkezett ostream referenciét
+ */
+template<typename F>
+std::ostream& operator<<(std::ostream& os,Graph<F>& g){
+    os<<"vertices: "<<g.getNumberOfVertices()<<" ; edges: "<<g.getNumberOfEdges()<<std::endl;
+    os<<"    ";
+    for (size_t k = 0; k < g.adjMatrix.getxmax(); ++k) {
+        os<<k<<" ";
+    }
+    os<<std::endl<<"  ";
+    for (size_t k = 0; k < g.adjMatrix.getxmax(); ++k) {
+        os<<"---";
+    }
+    os<<std::endl;
+    for (size_t i = 0; i < g.adjMatrix.getxmax(); ++i) {
+        os<<i<<" | ";
+        for (size_t j = 0; j < g.adjMatrix.getymax(); ++j) {
+            os<< g.adjMatrix[i][j].isConnected()<<" ";
+        }
+        os<<std::endl;
+    }
+    if(g.feltoltve){
+        os<<"A csucsokhoz tartozo adatok:"<<std::endl;
+        for (size_t i = 0; i < g.adjMatrix.getxmax(); ++i) {
+            os<<i<<"->"<< g.getDataFromID(i)<<"; ";
+        }
+    }
+    os<<std::endl;
 
-#endif //GENIRGRAFNAGYHF_GRAPH_H
+    return os;
+};
+
+#endif //GENIRGRAFNAGYHF_GRAPH_HPP
