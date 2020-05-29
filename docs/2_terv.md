@@ -1,9 +1,11 @@
 # Generikus irányítatlan gráf terv
+# Generikus irányítatlan gráf terv
 
 [TOC]
 
 ## Osztályok
 
+@image latex ./pics/UMLv2.png
 <img src="./pics/UMLv2.png" alt="UMLv1"/>
 
 A feladat megvalósításához előreláthatólag 7 db osztályt használok fel. A tanult eszközök közül az öröklést, az egymásba ágyazott osztályokat és a tartalmazást tervezem felhasználni. Az ábrán még nem szerepel, de a diagram bővülni fog a teszteléshez használt példa osztályokkal.
@@ -52,6 +54,7 @@ A program tervezése során lehetőséget biztosítottam a jövőbeli bővíthet
 
 A specifikációban már említettem, hogy a program célja a [BSZ2](http://cs.bme.hu/bsz2) tárgyból tanultak elmélyítése. Így a szélességi bejárás algoritmusát is a tárgyban tanultak alapján szeretném megvalósítani. Az algoritmus és annak teljes leírása [itt](http://cs.bme.hu/bsz2/bfs.pdf) érhető el. Szeretném kiemelni az alábbi fontosabb részt:
 
+@image latex ./pics/BFS.png
 ![BFS](./pics/BFS.png)
 
 Az algoritmusom megvalósítása közben hasonló változóneveket szeretnék használni. Az algoritmust jelenleg egy helyen tervezem módosítani. A `*` távolság helyett `-1`-et tervezek használni. Nálam ez lesz a végtelen jelölése, ez hibakeresés során jól megkülönböztethető lesz a többi távolság értéktől.

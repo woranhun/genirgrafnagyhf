@@ -32,7 +32,9 @@ int main() {
     delete ret;
 
     std::ifstream t4af("g6af.txt");
-    Graph<char> t4a(t4af);
+    std::ifstream t4afdata("g6bdata.txt");
+    Graph<Ember> t4a(t4af);
+    t4a.readDataFromFile(t4afdata,Ember::CreateEmber);
     std::cout << t4a;
     std::cout << t4a.isConnectedGraph() << std::endl;
 

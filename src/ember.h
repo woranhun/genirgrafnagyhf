@@ -13,12 +13,8 @@
  * @brief Ember osztály
  */
 class Ember {
-/**
- * @param nev A név
- * @param kor A kor
- */
-std::string nev;
-int kor;
+std::string nev;//!< A név
+int kor;//!< A kor
 public:
     /**
      * @brief Az Ember osztály alapértelmezett konstruktora

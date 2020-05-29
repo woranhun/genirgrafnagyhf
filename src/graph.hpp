@@ -21,23 +21,16 @@
  */
 template<typename T>
 class Graph{
-    /**
-     * @bug feltoltve nincs UML-en
-     * @param numofv a csúcsok száma
-     * @param numofe az élek száma
-     * @param adjMatrix a gráfhoz tartozó szomszédsági mátrix
-     * @param verteces a gráfhoz tartozó csúcsok
-     */
-    size_t numofv;
-    size_t numofe;
-    Matrix< Edge<T> > adjMatrix;
-    Vertex<T>** verteces;
-    bool feltoltve;
+    size_t numofv; //!< A csúcsok száma
+    size_t numofe; //!< Az élek száma
+    Matrix< Edge<T> > adjMatrix; //!< A gráfhoz tartozó szomszédsági mátrix
+    Vertex<T>** verteces; //!< A gráfhoz tartozó csúcsok
+    bool isDataUploaded; //!<A gráf fel van-e töltve adatokkal
 public:
     /**
      * @brief Grapf default konstruktora
      */
-    Graph():numofv(0),numofe(0),adjMatrix(Matrix<Edge<T> >()),verteces(NULL),feltoltve(false){};
+    Graph():numofv(0),numofe(0),adjMatrix(Matrix<Edge<T> >()),verteces(NULL),isDataUploaded(false){};
     /**
      * @brief a Graph konstruktora fájlból
      * @param file a szomszédsági mátrix fájlja
@@ -76,9 +69,12 @@ public:
     template<typename F>
     friend std::ostream& operator<<(std::ostream& os,Graph<F>& g);
     /**
-     * @brief Hozzáad egy élet a gráfhoz.
-     * @param e a hozzáadandó él
-     * @return nincs
+     * @brief Beállít egy élet a megadott értékekre
+     * @param y melyik sor
+     * @param x a soron belül melyik elem
+     * @param con az él be van-e húzva
+     * @param src forráscsúcs
+     * @param dst célcsúcs
      */
     void setEdge(size_t y, size_t x,bool con, Vertex<T>* src,Vertex<T>* dst){
         if(!this->adjMatrix[y][x]&&con)numofe++;
@@ -88,27 +84,13 @@ public:
         adjMatrix[y][x]->dst=dst;
     }
     /**
-     * @bug Remove from UML
-     * @brief Eltávolít egy élet a gráfból
-     * @param e az eltávolítandó él
-     * @return nincs
-     */
-    //void removeEdge(Edge<T> e);
-
-    /**
      * @class VertexSet
      * @brief Csúcsok halmazának tárolására alkalmas osztály
-     * @param data a csúcsok tömbje, maximális mérete megegyezik a gráf csúcsainak számával
-     * @param len az éppen tárolt mennyiség
      */
     class VertexSet{
     protected:
-        /**
-         * @param len Vertex set aktuális mérete
-         * @param data az adatokat tároló tömb
-         */
-        size_t len;
-        Vertex<T>** data;
+        size_t len; //!< Vertex set aktuális mérete
+        Vertex<T>** data; //!< Az adatokat tároló tömb
     public:
         /**
          *@brief A csúcshalmaz default konstruktora
@@ -142,7 +124,6 @@ public:
         }
         /**
          * @brief visszaadja a kért csúcsot
-         * @bug Át let nevezve getData-ról, hogy átláthatóbb legyen a kód. ÍRD ÁT UML-BEN !IMPORTANT!
          * @param index a csúcs id-je
          * @return a kért csúcs
          */
@@ -173,19 +154,11 @@ public:
     /**
      * @class BFSSet
      * @brief BFS algoritmushoz készült tároló. A VerexSet-ből származik.
-     * @param distance Távolság a kezdőponttól. Alapértelmezett érték -1;
-     * @param prevVertex Egy lista, ami megmutatja, hogy honnan jutottam az adott csúcsba
-     * @param prevVertexLen Ennek a listának a mérete
      */
     class BFSSet: public VertexSet{
-        /**
-         * @param distance A csúcs távolsága a kezdőcsúcstól
-         * @param prevVertex Lista, amely minden csúcshoz hozzárendelő az őt megelőző csúcs azonosítóját
-         * @param prevVertexLen Tárolja a lista aktuális méretét
-         */
-        long* distance;
-        Vertex<T>** prevVertex;
-        size_t prevVertexLen;
+        long* distance; //!<  csúcs távolsága a kezdőcsúcstól
+        Vertex<T>** prevVertex; //!< Lista, amely minden csúcshoz hozzárendelő az őt megelőző csúcs azonosítóját
+        size_t prevVertexLen; //!< Tárolja a lista aktuális méretét
     public:
         /**
          * @brief BFSSet default konstruktora
@@ -281,7 +254,6 @@ public:
         return NULL;
     }
     /**
-     * @bug UML-re felrakni
      * @brief Visszadja a kapott ID alapján a megfelelő csúcshoz tartozó adatot
      * @param id A kapott ID
      * @return A csúcs adata
@@ -290,7 +262,6 @@ public:
         return verteces[id]->getData();
     }
     /**
-     * @bug default pramétereket át kell írni az UML-en! !IMPORTANT!
      * @brief BFS alkogritmus
      * @param honnan csúcs id, ahonnan az algoritmus indul
      * @return visszad egy BFSSet-re mutató pointert. A felszabadítás a felhasználó dolga.
@@ -374,7 +345,7 @@ public:
             ss>> tempdata;
             verteces[i]->setData(tempdata);
         }
-        feltoltve=true;
+        isDataUploaded=true;
     }
     /**
      * @brief Beolvassa a csúcs adatait fájlból, majd meghívja miden soron a kapott függvényt.
@@ -393,7 +364,7 @@ public:
             verteces[i]->setData(tempdata);
             delete tempptr;
         }
-        feltoltve=true;
+        isDataUploaded=true;
     }
     /**
      * @brief A gráf destruktora
@@ -410,7 +381,7 @@ public:
  * @tparam F A gráf ilyen adatokat tárol
  * @param os ostream referencia
  * @param g A kapott gráf
- * @return A keletkezett ostream referenciét
+ * @return A keletkezett ostream referencia
  */
 template<typename F>
 std::ostream& operator<<(std::ostream& os,Graph<F>& g){
@@ -431,7 +402,7 @@ std::ostream& operator<<(std::ostream& os,Graph<F>& g){
         }
         os<<std::endl;
     }
-    if(g.feltoltve){
+    if(g.isDataUploaded){
         os<<"A csucsokhoz tartozo adatok:"<<std::endl;
         for (size_t i = 0; i < g.adjMatrix.getxmax(); ++i) {
             os<<i<<"->"<< g.getDataFromID(i)<<"; ";
