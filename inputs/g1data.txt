@@ -1,0 +1,3 @@
+Proba Bela;3
+Proba Tamas;2
+Proba Imre;10

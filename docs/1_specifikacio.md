@@ -1,4 +1,5 @@
 # Generikus irányítatlan gráf specifikáció
+# Generikus irányítatlan gráf specifikáció
 
 [TOC]
 
